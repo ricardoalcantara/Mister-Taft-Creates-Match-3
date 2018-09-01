@@ -5,10 +5,9 @@
 [ext_resource path="res://art/Bottom UI v 2.png" type="Texture" id=3]
 [ext_resource path="res://scripts/Grid.gd" type="Script" id=4]
 
-[node name="GameWindow" type="Node2D" index="0"]
+[node name="GameWindow" type="Node2D"]
 
-[node name="Background" type="TextureRect" parent="." index="0"]
-
+[node name="Background" type="TextureRect" parent="."]
 anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 0.0
@@ -24,16 +23,14 @@ size_flags_vertical = 1
 texture = ExtResource( 1 )
 stretch_mode = 0
 
-[node name="CanvasLayer" type="CanvasLayer" parent="." index="1"]
-
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
 layer = 1
 offset = Vector2( 0, 0 )
 rotation = 0.0
 scale = Vector2( 1, 1 )
 transform = Transform2D( 1, 0, 0, 1, 0, 0 )
 
-[node name="TopUI" type="TextureRect" parent="CanvasLayer" index="0"]
-
+[node name="TopUI" type="TextureRect" parent="CanvasLayer"]
 anchor_left = 0.5
 anchor_top = 0.0
 anchor_right = 0.5
@@ -50,8 +47,7 @@ size_flags_vertical = 1
 texture = ExtResource( 2 )
 stretch_mode = 0
 
-[node name="BottomUI" type="TextureRect" parent="CanvasLayer" index="1"]
-
+[node name="BottomUI" type="TextureRect" parent="CanvasLayer"]
 anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
@@ -68,13 +64,11 @@ size_flags_vertical = 1
 texture = ExtResource( 3 )
 stretch_mode = 0
 
-[node name="Grid" type="Node2D" parent="." index="2"]
-
+[node name="Grid" type="Node2D" parent="."]
 script = ExtResource( 4 )
 _width = 8
 _height = 10
 _x_start = 64
 _y_start = 800
 _offset = 64
-
 

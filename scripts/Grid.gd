@@ -49,7 +49,7 @@ func spawn_pieces():
 				loop += 1;
 				
 			add_child(piece);
-			piece.position = grid_to_pixel(i, j);
+			piece.position = grid_to_pixel(Vector2(i, j));
 			all_pieces[i][j] = piece;
 
 func match_at(column, row, color):
@@ -65,45 +65,43 @@ func match_at(column, row, color):
 				
 	return false;
 
-func grid_to_pixel(column, row):
-	var new_x = _x_start + _offset * column;
-	var new_y = _y_start + -_offset * row;
+func grid_to_pixel(grid_pos):
+	var new_x = _x_start + _offset * grid_pos.x;
+	var new_y = _y_start + -_offset * grid_pos.y;
 	return Vector2(new_x, new_y);
 	
-func pixel_to_grid(pixel_x, pixel_y):
-	var new_x = round((pixel_x - _x_start) / _offset);
-	var new_y = round((pixel_y - _y_start) / -_offset);
+func pixel_to_grid(pixel_pos):
+	var new_x = round((pixel_pos.x - _x_start) / _offset);
+	var new_y = round((pixel_pos.y - _y_start) / -_offset);
 	return Vector2(new_x, new_y);
 
-func is_in_grid(column, row):
-	if column >= 0 and column < _width:
-		if row >= 0 and row < _height:
+func is_in_grid(grid_position):
+	if grid_position.x >= 0 and grid_position.x < _width:
+		if grid_position.y >= 0 and grid_position.y < _height:
 			return true;
 	return false;
 
 func touch_input():
 	if Input.is_action_just_pressed("ui_touch"):
-		first_touch = get_global_mouse_position();
-		var grid_position = pixel_to_grid(first_touch.x, first_touch.y);
-		if is_in_grid(grid_position.x, grid_position.y):
+		var mouse_pos = pixel_to_grid(get_global_mouse_position());
+		if is_in_grid(mouse_pos):
+			first_touch = mouse_pos;
 			controlling = true;
 			
 	if Input.is_action_just_released("ui_touch"):
-		final_touch = get_global_mouse_position();
-		var first_position = pixel_to_grid(first_touch.x, first_touch.y);
-		var final_position = pixel_to_grid(final_touch.x, final_touch.y);
-		if is_in_grid(final_position.x, final_position.y) and is_in_grid(first_position.x, first_position.y) and controlling:
-			touch_difference(first_position, final_position);
+		var mouse_pos = pixel_to_grid(get_global_mouse_position());
+		if is_in_grid(mouse_pos):
+			final_touch = mouse_pos;
+			touch_difference(first_touch, final_touch);
 			controlling = false;
-		
 
 func swap_pieces(column, row, direction):
 	var first_piece = all_pieces[column][row];
 	var other_piece = all_pieces[column + direction.x][row + direction.y];
 	all_pieces[column][row] = other_piece;
 	all_pieces[column + direction.x][row + direction.y] = first_piece;
-	first_piece.move(grid_to_pixel(column + direction.x, row + direction.y));
-	other_piece.move(grid_to_pixel(column, row));
+	first_piece.move(grid_to_pixel(Vector2(column + direction.x, row + direction.y)));
+	other_piece.move(grid_to_pixel(Vector2(column, row)));
 	find_matches();
 
 func touch_difference(grid_1, grid_2):
