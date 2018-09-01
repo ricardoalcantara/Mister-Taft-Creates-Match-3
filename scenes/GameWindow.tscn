@@ -24,6 +24,7 @@ texture = ExtResource( 1 )
 stretch_mode = 0
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
+editor/display_folded = true
 layer = 1
 offset = Vector2( 0, 0 )
 rotation = 0.0
@@ -72,3 +73,17 @@ _x_start = 64
 _y_start = 800
 _offset = 64
 
+[node name="DestroyTimer" type="Timer" parent="."]
+process_mode = 1
+wait_time = 0.5
+one_shot = true
+autostart = false
+
+[node name="CollapseTimer" type="Timer" parent="."]
+process_mode = 1
+wait_time = 0.5
+one_shot = true
+autostart = false
+
+[connection signal="timeout" from="DestroyTimer" to="Grid" method="_on_DestroyTimer_timeout"]
+[connection signal="timeout" from="CollapseTimer" to="Grid" method="_on_CollapseTimer_timeout"]

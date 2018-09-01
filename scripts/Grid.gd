@@ -98,6 +98,10 @@ func touch_input():
 func swap_pieces(column, row, direction):
 	var first_piece = all_pieces[column][row];
 	var other_piece = all_pieces[column + direction.x][row + direction.y];
+	
+	if first_piece == null or other_piece == null:
+		return;
+	
 	all_pieces[column][row] = other_piece;
 	all_pieces[column + direction.x][row + direction.y] = first_piece;
 	first_piece.move(grid_to_pixel(Vector2(column + direction.x, row + direction.y)));
@@ -144,6 +148,36 @@ func find_matches():
 							all_pieces[i][j - 1].dim();
 							all_pieces[i][j].dim();
 							all_pieces[i][j + 1].dim();
+	get_parent().get_node("DestroyTimer").start();
 
 func _process(delta):
 	touch_input();
+
+func destroy_matched():
+	for i in _width:
+		for j in _height:
+			if all_pieces[i][j] != null and all_pieces[i][j].matched:
+				all_pieces[i][j].queue_free();
+				all_pieces[i][j] = null;
+				pass;
+	get_parent().get_node("CollapseTimer").start();
+
+func _on_DestroyTimer_timeout():
+	destroy_matched();
+
+func collapse_columns():
+	for i in _width:
+		for j in _height:
+			if all_pieces[i][j] == null:
+				for k in range(j + 1, _height):
+					if all_pieces[i][k] != null:
+						all_pieces[i][k].move(grid_to_pixel(Vector2(i, j)));
+						all_pieces[i][j] = all_pieces[i][k];
+						all_pieces[i][k] = null;
+						break;
+#						all_pieces[i][j] = all_pieces[i][k];
+#						all_pieces[i][k] = null;
+#						all_pieces[i][j].move(grid_to_pixel(Vector2(i, j)));
+
+func _on_CollapseTimer_timeout():
+	collapse_columns();
