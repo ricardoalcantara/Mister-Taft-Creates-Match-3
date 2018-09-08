@@ -5,6 +5,7 @@ export (int) var _height;
 export (int) var _x_start;
 export (int) var _y_start;
 export (int) var _offset;
+export (int) var _y_offset;
 
 var possible_pieces = [
 preload("res://scenes/YellowPiece.tscn"),
@@ -14,6 +15,10 @@ preload("res://scenes/OrangePiece.tscn"),
 preload("res://scenes/GreenPiece.tscn"),
 preload("res://scenes/LightGreenPiece.tscn"),
 ];
+
+onready var destroy_timer = get_parent().get_node("DestroyTimer");
+onready var collapse_timer = get_parent().get_node("CollapseTimer");
+onready var refill_timer = get_parent().get_node("RefillTimer");
 
 var all_pieces = [];
 
@@ -148,7 +153,7 @@ func find_matches():
 							all_pieces[i][j - 1].dim();
 							all_pieces[i][j].dim();
 							all_pieces[i][j + 1].dim();
-	get_parent().get_node("DestroyTimer").start();
+	destroy_timer.start();
 
 func _process(delta):
 	touch_input();
@@ -160,7 +165,7 @@ func destroy_matched():
 				all_pieces[i][j].queue_free();
 				all_pieces[i][j] = null;
 				pass;
-	get_parent().get_node("CollapseTimer").start();
+	collapse_timer.start();
 
 func _on_DestroyTimer_timeout():
 	destroy_matched();
@@ -178,6 +183,30 @@ func collapse_columns():
 #						all_pieces[i][j] = all_pieces[i][k];
 #						all_pieces[i][k] = null;
 #						all_pieces[i][j].move(grid_to_pixel(Vector2(i, j)));
+	refill_timer.start();
 
 func _on_CollapseTimer_timeout():
 	collapse_columns();
+
+func refill_columns():
+	for i in _width:
+		for j in _height:
+			if all_pieces[i][j] == null:
+				#var rand = floor(rand_range(0, possible_pieces.size()));
+				var rand = randi()%possible_pieces.size();
+				var piece = possible_pieces[rand].instance();
+				var loop = 0;
+				while match_at(i, j, piece._color) and loop < 100:
+					# rand = floor(rand_range(0, possible_pieces.size()));
+					rand = randi()%possible_pieces.size();
+					piece = possible_pieces[rand].instance();
+					loop += 1;
+					
+				add_child(piece);
+				piece.position = grid_to_pixel(Vector2(i, j - _y_offset));
+				piece.move(grid_to_pixel(Vector2(i, j)));
+				all_pieces[i][j] = piece;
+	find_matches();
+
+func _on_RefillTimer_timeout():
+	refill_columns();

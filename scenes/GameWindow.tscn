@@ -72,6 +72,7 @@ _height = 10
 _x_start = 64
 _y_start = 800
 _offset = 64
+_y_offset = -2
 
 [node name="DestroyTimer" type="Timer" parent="."]
 process_mode = 1
@@ -85,5 +86,12 @@ wait_time = 0.5
 one_shot = true
 autostart = false
 
+[node name="RefillTimer" type="Timer" parent="."]
+process_mode = 1
+wait_time = 0.5
+one_shot = true
+autostart = false
+
 [connection signal="timeout" from="DestroyTimer" to="Grid" method="_on_DestroyTimer_timeout"]
 [connection signal="timeout" from="CollapseTimer" to="Grid" method="_on_CollapseTimer_timeout"]
+[connection signal="timeout" from="RefillTimer" to="Grid" method="_on_RefillTimer_timeout"]
