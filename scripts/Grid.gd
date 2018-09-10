@@ -1,11 +1,15 @@
 extends Node2D
 
+enum state_enum { wait, move };
+
 export (int) var _width;
 export (int) var _height;
 export (int) var _x_start;
 export (int) var _y_start;
 export (int) var _offset;
 export (int) var _y_offset;
+
+var _state;
 
 var possible_pieces = [
 preload("res://scenes/YellowPiece.tscn"),
@@ -27,9 +31,14 @@ var final_touch = Vector2();
 var controlling = false;
 
 func _ready():
+	_state = state_enum.move;
 	randomize();
 	all_pieces = make_2d_array();
 	spawn_pieces();
+
+func _process(delta):
+	if _state == state_enum.move:
+		touch_input();
 
 func make_2d_array():
 	var array = [];
@@ -107,6 +116,7 @@ func swap_pieces(column, row, direction):
 	if first_piece == null or other_piece == null:
 		return;
 	
+	_state = state_enum.wait;
 	all_pieces[column][row] = other_piece;
 	all_pieces[column + direction.x][row + direction.y] = first_piece;
 	first_piece.move(grid_to_pixel(Vector2(column + direction.x, row + direction.y)));
@@ -155,9 +165,6 @@ func find_matches():
 							all_pieces[i][j + 1].dim();
 	destroy_timer.start();
 
-func _process(delta):
-	touch_input();
-
 func destroy_matched():
 	for i in _width:
 		for j in _height:
@@ -180,9 +187,6 @@ func collapse_columns():
 						all_pieces[i][j] = all_pieces[i][k];
 						all_pieces[i][k] = null;
 						break;
-#						all_pieces[i][j] = all_pieces[i][k];
-#						all_pieces[i][k] = null;
-#						all_pieces[i][j].move(grid_to_pixel(Vector2(i, j)));
 	refill_timer.start();
 
 func _on_CollapseTimer_timeout():
@@ -206,7 +210,16 @@ func refill_columns():
 				piece.position = grid_to_pixel(Vector2(i, j - _y_offset));
 				piece.move(grid_to_pixel(Vector2(i, j)));
 				all_pieces[i][j] = piece;
-	find_matches();
+	after_refill();
+
+func after_refill():
+	for i in _width:
+		for j in _height:
+			if all_pieces[i][j] != null:
+				if match_at(i, j, all_pieces[i][j]._color):
+					find_matches();
+					return;
+	_state = state_enum.move;
 
 func _on_RefillTimer_timeout():
 	refill_columns();
