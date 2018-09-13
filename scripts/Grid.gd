@@ -26,6 +26,12 @@ onready var refill_timer = get_parent().get_node("RefillTimer");
 
 var all_pieces = [];
 
+var piece_one = null;
+var piece_two = null;
+var last_place = Vector2();
+var last_direction = Vector2();
+var move_checked = false;
+
 var first_touch = Vector2();
 var final_touch = Vector2();
 var controlling = false;
@@ -116,12 +122,28 @@ func swap_pieces(column, row, direction):
 	if first_piece == null or other_piece == null:
 		return;
 	
+	store_info(first_piece, other_piece, Vector2(column, row), direction);
 	_state = state_enum.wait;
 	all_pieces[column][row] = other_piece;
 	all_pieces[column + direction.x][row + direction.y] = first_piece;
 	first_piece.move(grid_to_pixel(Vector2(column + direction.x, row + direction.y)));
 	other_piece.move(grid_to_pixel(Vector2(column, row)));
-	find_matches();
+	
+	if not move_checked:
+		find_matches();
+
+func store_info(first_piece, other_piece, place, direction):
+	piece_one = first_piece;
+	piece_two = other_piece;
+	last_place = place;
+	last_direction = direction;
+	pass;
+
+func swap_back():
+	if piece_one and piece_two:
+		swap_pieces(last_place.x, last_place.y, last_direction);
+	_state = state_enum.move;
+	move_checked = false;
 
 func touch_difference(grid_1, grid_2):
 	var difference = grid_2 - grid_1;
@@ -166,13 +188,20 @@ func find_matches():
 	destroy_timer.start();
 
 func destroy_matched():
+	var was_matched: bool;
 	for i in _width:
 		for j in _height:
 			if all_pieces[i][j] != null and all_pieces[i][j].matched:
+				was_matched = true;
 				all_pieces[i][j].queue_free();
 				all_pieces[i][j] = null;
 				pass;
-	collapse_timer.start();
+	
+	move_checked = true;
+	if was_matched:
+		collapse_timer.start();
+	else:
+		swap_back();
 
 func _on_DestroyTimer_timeout():
 	destroy_matched();
@@ -220,6 +249,7 @@ func after_refill():
 					find_matches();
 					return;
 	_state = state_enum.move;
+	move_checked = false;
 
 func _on_RefillTimer_timeout():
 	refill_columns();
